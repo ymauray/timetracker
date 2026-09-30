@@ -22,6 +22,17 @@ public static class FormatHelpers
 
     public static string NomMois(int mois) => MoisFr[mois - 1];
 
+    public static string NomAbsence(Absence absence) => absence switch
+    {
+        Absence.Aucune => "",
+        Absence.Conges => "Congés",
+        Absence.Maladie => "Maladie",
+        Absence.Ferie => "Férié",
+        Absence.RTT => "RTT",
+        Absence.Divers => "Divers",
+        _ => absence.ToString(),
+    };
+
     public static string FormatDate(DateOnly date) => date.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
     /// Duree non signee (toujours >= 0), ex: "8h12", "41h00".

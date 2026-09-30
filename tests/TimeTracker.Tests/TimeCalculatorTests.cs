@@ -39,7 +39,7 @@ public class TimeCalculatorTests
     [Fact]
     public void JourAbsence_EstNeutreSurLeSolde()
     {
-        var jour = new DayEntry { Date = new DateOnly(2026, 9, 28), Absence = Absence.CP };
+        var jour = new DayEntry { Date = new DateOnly(2026, 9, 28), Absence = Absence.Conges };
         var rapport = TimeCalculator.Calculer([jour], Config);
 
         var resultat = Assert.Single(rapport.Jours);

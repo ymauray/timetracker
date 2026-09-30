@@ -13,6 +13,9 @@ public static partial class ReleveParser
     private static readonly string[] ColonnesAttendues =
         ["Date", "Arrivee", "Debut pause", "Fin pause", "Depart", "Absence"];
 
+    // "d"/"M" acceptent 1 ou 2 chiffres a l'analyse : couvre 1.10.2026, 21.2.2027, 01.10.2026...
+    private static readonly string[] FormatsDate = ["d.M.yyyy"];
+
     public static ParseResult Parse(string[] lignes)
     {
         var erreurs = new List<ParseError>();
@@ -57,9 +60,11 @@ public static partial class ReleveParser
             }
 
             var dateTexte = cellules[0].Trim();
-            if (!DateOnly.TryParseExact(dateTexte, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            if (dateTexte.Length == 0) continue; // ligne sans date : separateur visuel, ignoree
+
+            if (!DateOnly.TryParseExact(dateTexte, FormatsDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             {
-                erreurs.Add(new ParseError { Ligne = numero, Message = $"Date invalide '{dateTexte}' (format attendu jj.mm.aaaa)." });
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Date invalide '{dateTexte}' (format attendu jj.mm.aaaa, ex: 1.10.2026 ou 21.02.2027)." });
                 continue;
             }
 
@@ -77,7 +82,7 @@ public static partial class ReleveParser
             }
             else if (!TryParseAbsence(absenceTexte, out absence))
             {
-                erreurs.Add(new ParseError { Ligne = numero, Message = $"Code absence inconnu '{absenceTexte}' (valeurs valides : CP, Maladie, Ferie, RTT)." });
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Code absence inconnu '{absenceTexte}' (valeurs valides : Conges ou CP, Maladie, Ferie, RTT, Divers)." });
                 continue;
             }
 
@@ -168,10 +173,11 @@ public static partial class ReleveParser
         var normalise = RetirerAccents(texte).Trim().ToUpperInvariant();
         switch (normalise)
         {
-            case "CP": absence = Absence.CP; return true;
+            case "CP" or "CONGES": absence = Absence.Conges; return true;
             case "MALADIE": absence = Absence.Maladie; return true;
             case "FERIE": absence = Absence.Ferie; return true;
             case "RTT": absence = Absence.RTT; return true;
+            case "DIVERS": absence = Absence.Divers; return true;
             default: absence = Absence.Aucune; return false;
         }
     }

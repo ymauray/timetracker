@@ -93,11 +93,42 @@ public class ReleveParserTests
     [InlineData("ferie", Absence.Ferie)]
     [InlineData("RTT", Absence.RTT)]
     [InlineData("maladie", Absence.Maladie)]
+    [InlineData("Conges", Absence.Conges)]
+    [InlineData("Congés", Absence.Conges)]
+    [InlineData("CP", Absence.Conges)]
+    [InlineData("cp", Absence.Conges)]
+    [InlineData("Divers", Absence.Divers)]
+    [InlineData("divers", Absence.Divers)]
     public void CodeAbsence_EstReconnuQuelQueSoitLAccentuationEtLaCasse(string texte, Absence attendu)
     {
         var resultat = ReleveParser.Parse(Lignes($"|28.09.2026|||||{texte}|"));
 
         Assert.Empty(resultat.Erreurs);
         Assert.Equal(attendu, Assert.Single(resultat.Entrees).Absence);
+    }
+
+    [Fact]
+    public void LigneSansDate_EstIgnoreeSansErreur()
+    {
+        var resultat = ReleveParser.Parse(Lignes(
+            "|28.09.2026|8h50|12h00|12h20|16h50||",
+            "|          |    |     |     |     |  |",
+            "|29.09.2026|8h50|12h00|12h20|16h50||"));
+
+        Assert.Empty(resultat.Erreurs);
+        Assert.Equal(2, resultat.Entrees.Count);
+    }
+
+    [Theory]
+    [InlineData("1.10.2026", 2026, 10, 1)]
+    [InlineData("21.2.2027", 2027, 2, 21)]
+    [InlineData("1.2.2027", 2027, 2, 1)]
+    [InlineData("28.09.2026", 2026, 9, 28)]
+    public void DateAUnOuDeuxChiffres_EstAcceptee(string texte, int annee, int mois, int jour)
+    {
+        var resultat = ReleveParser.Parse(Lignes($"|{texte}|8h50|12h00|12h20|16h50||"));
+
+        Assert.Empty(resultat.Erreurs);
+        Assert.Equal(new DateOnly(annee, mois, jour), Assert.Single(resultat.Entrees).Date);
     }
 }

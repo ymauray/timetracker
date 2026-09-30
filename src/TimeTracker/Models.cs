@@ -3,10 +3,11 @@ namespace TimeTracker;
 public enum Absence
 {
     Aucune,
-    CP,
+    Conges,
     Maladie,
     Ferie,
     RTT,
+    Divers,
 }
 
 public sealed class DayEntry
