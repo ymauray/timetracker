@@ -80,6 +80,8 @@ dotnet publish src/TimeTracker -c Release -r <RID> --self-contained -p:PublishSi
 
 `<RID>` : `win-x64`, `linux-x64`, `osx-x64` ou `osx-arm64`.
 
+> Un binaire compilé ainsi répond `0.0.0.0` à `--version` : la vraie version n'est injectée que par la [release CI](#intégration-continue-et-releases) via `-p:Version=X.Y.Z`. Pour tester un numéro de version précis en local, ajoutez `-p:Version=X.Y.Z` à la commande ci-dessus.
+
 ## Intégration continue et releases
 
 - **CI** (`.github/workflows/ci.yml`) : build + tests unitaires (xUnit) à chaque push et pull request sur `main`.
