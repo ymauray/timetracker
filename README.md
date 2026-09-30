@@ -12,7 +12,7 @@ Site : https://ymauray.github.io/timetracker/
 
 - Pointage quotidien en Markdown (arrivée, pause déjeuner, départ) — un seul fichier texte, éditable partout.
 - Règle de pause minimale configurable (ex : une pause de 15 min est quand même décomptée comme 30 min).
-- Jours d'absence (CP, Maladie, Férié, RTT) neutres sur le solde d'heures.
+- Jours d'absence (Congés, Maladie, Férié, RTT, Divers) neutres sur le solde d'heures.
 - Bilan hebdomadaire et bilan mensuel avec report du solde d'un mois sur l'autre et alerte de tolérance (± une plage configurable).
 - Jour ouvré oublié dans le pointage → signalé et compté en déficit.
 - Génère un rapport Markdown et un rapport PDF mis en forme.
@@ -58,12 +58,13 @@ pause_minimum: 0h30
 |Date      |Arrivée|Début pause|Fin pause|Départ|Absence|
 |----------|-------|-----------|---------|------|-------|
 |28.09.2026|8h50   |12h00      |12h20    |16h50 |       |
-|29.09.2026|       |           |         |      |CP     |
+|29.09.2026|       |           |         |      |Congés |
 ```
 
-- Dates au format `jj.mm.aaaa`, heures au format `Hh` ou `HhMM` (ex : `8h`, `8h30`).
-- Colonne `Absence` : vide (jour travaillé) ou un code parmi `CP`, `Maladie`, `Ferie`/`Férié`, `RTT`.
+- Dates au format `j.m.aaaa` (jour et mois à 1 ou 2 chiffres, ex : `1.10.2026`, `21.02.2027`, `28.09.2026`), heures au format `Hh` ou `HhMM` (ex : `8h`, `8h30`).
+- Colonne `Absence` : vide (jour travaillé) ou un code parmi `Conges`/`CP`, `Maladie`, `Ferie`/`Férié`, `RTT`, `Divers`.
 - Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`).
+- Une ligne sans date (colonne `Date` vide) est ignorée : pratique pour aérer visuellement le tableau entre deux semaines.
 - Un jour ouvré absent du fichier est compté comme un déficit de la journée entière.
 
 Toute ligne invalide (date, heure, code absence, cohérence horaire...) est rapportée avec son numéro de ligne ; aucun bilan n'est généré tant que le fichier contient des erreurs.

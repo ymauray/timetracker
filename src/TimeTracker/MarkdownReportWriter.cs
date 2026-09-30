@@ -68,7 +68,7 @@ public static class MarkdownReportWriter
         foreach (var j in rapport.Jours)
         {
             var e = j.Entree;
-            var absenceTxt = e.Absence == Absence.Aucune ? "" : e.Absence.ToString();
+            var absenceTxt = FormatHelpers.NomAbsence(e.Absence);
             string ligne;
             if (!e.Renseigne)
             {

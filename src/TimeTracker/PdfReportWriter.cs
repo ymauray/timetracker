@@ -217,7 +217,7 @@ public static class PdfReportWriter
 
                     DonneeCell(table.Cell(), FormatHelpers.FormatDate(e.Date), fond, 8);
                     DonneeCell(table.Cell(), FormatHelpers.NomJour(e.Date), fond, 8);
-                    DonneeCell(table.Cell(), e.Renseigne ? (e.Absence == Absence.Aucune ? "-" : e.Absence.ToString()) : "manquant", fond, 8);
+                    DonneeCell(table.Cell(), e.Renseigne ? (e.Absence == Absence.Aucune ? "-" : FormatHelpers.NomAbsence(e.Absence)) : "manquant", fond, 8);
 
                     if (e.Renseigne && e.Absence == Absence.Aucune)
                     {
