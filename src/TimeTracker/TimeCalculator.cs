@@ -4,8 +4,6 @@ namespace TimeTracker;
 
 public static class TimeCalculator
 {
-    public static readonly TimeSpan ToleranceMensuelle = TimeSpan.FromHours(10);
-
     public sealed class Rapport
     {
         public required List<DayResult> Jours { get; init; }
@@ -88,6 +86,7 @@ public static class TimeCalculator
         {
             cumulMois += m.Ecart;
             m.SoldeCumule = cumulMois;
+            m.HorsTolerance = cumulMois.Duration() > config.Tolerance;
         }
 
         return new Rapport
@@ -115,12 +114,6 @@ public static class TimeCalculator
         var theorique = estOuvre ? config.DureeJournee : TimeSpan.Zero;
 
         var pauseDecomptee = TimeSpan.Zero;
-        if (entree.DebutPause is not null && entree.FinPause is not null)
-        {
-            var pauseReelle = entree.FinPause.Value - entree.DebutPause.Value;
-            pauseDecomptee = pauseReelle > config.PauseMinimum ? pauseReelle : config.PauseMinimum;
-        }
-
         TimeSpan realise;
         if (entree.Absence != Absence.Aucune)
         {
@@ -128,6 +121,11 @@ public static class TimeCalculator
         }
         else if (entree.Arrivee is not null && entree.Depart is not null)
         {
+            // reglement : une journee sans pause saisie perd quand meme la pause minimum
+            var pauseReelle = entree.DebutPause is not null && entree.FinPause is not null
+                ? entree.FinPause.Value - entree.DebutPause.Value
+                : TimeSpan.Zero;
+            pauseDecomptee = pauseReelle > config.PauseMinimum ? pauseReelle : config.PauseMinimum;
             realise = (entree.Depart.Value - entree.Arrivee.Value) - pauseDecomptee;
         }
         else

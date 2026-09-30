@@ -33,7 +33,8 @@ public static class PdfReportWriter
                         $"Genere le {DateTime.Now:dd/MM/yyyy a HH:mm}").FontSize(9).FontColor(Colors.Grey.Darken1);
                     col.Item().Text(
                         $"Parametres : journee de reference {FormatHelpers.FormatDuree(rapport.Config.DureeJournee)}, " +
-                        $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}").FontSize(9).FontColor(Colors.Grey.Darken1);
+                        $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}, " +
+                        $"tolerance mensuelle {FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}").FontSize(9).FontColor(Colors.Grey.Darken1);
                     col.Item().PaddingTop(8).LineHorizontal(1).LineColor(CouleurEntete);
                 });
 
@@ -78,7 +79,7 @@ public static class PdfReportWriter
             if (moisHT.Count > 0)
             {
                 var liste = string.Join(", ", moisHT.Select(m => $"{FormatHelpers.NomMois(m.Mois)} {m.Annee} ({FormatHelpers.FormatEcart(m.SoldeCumule)})"));
-                col.Item().PaddingTop(4).Text($"Mois hors tolerance -10h/+10h : {liste}")
+                col.Item().PaddingTop(4).Text($"Mois hors tolerance {FormatHelpers.FormatTolerance(rapport.Config.Tolerance)} : {liste}")
                     .FontSize(9).FontColor(CouleurAlerteTexte);
             }
         });

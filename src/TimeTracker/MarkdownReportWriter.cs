@@ -12,7 +12,8 @@ public static class MarkdownReportWriter
         sb.AppendLine($"Periode : {FormatHelpers.FormatDate(rapport.DateDebut)} au {FormatHelpers.FormatDate(rapport.DateFin)}.  ");
         sb.AppendLine($"Genere le {DateTime.Now:dd/MM/yyyy a HH:mm}.  ");
         sb.AppendLine($"Parametres : journee de reference {FormatHelpers.FormatDuree(rapport.Config.DureeJournee)}, " +
-                      $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}.");
+                      $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}, " +
+                      $"tolerance mensuelle {FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}.");
         sb.AppendLine();
 
         if (rapport.JoursNonRenseignes.Count > 0 || rapport.Mois.Any(m => m.HorsTolerance))
@@ -29,7 +30,7 @@ public static class MarkdownReportWriter
             var moisHorsTolerance = rapport.Mois.Where(m => m.HorsTolerance).ToList();
             if (moisHorsTolerance.Count > 0)
             {
-                sb.AppendLine("Mois hors tolerance (-10h / +10h) :");
+                sb.AppendLine($"Mois hors tolerance ({FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}) :");
                 foreach (var m in moisHorsTolerance)
                     sb.AppendLine($"- {FormatHelpers.NomMois(m.Mois)} {m.Annee} : solde {FormatHelpers.FormatEcart(m.SoldeCumule)}");
                 sb.AppendLine();
@@ -54,7 +55,7 @@ public static class MarkdownReportWriter
         sb.AppendLine("|----|---------|-------|-----|------------|------|");
         foreach (var m in rapport.Mois)
         {
-            var statut = m.HorsTolerance ? "Hors tolerance (-10h/+10h)" : "OK";
+            var statut = m.HorsTolerance ? $"Hors tolerance ({FormatHelpers.FormatTolerance(rapport.Config.Tolerance)})" : "OK";
             sb.AppendLine($"|{FormatHelpers.NomMois(m.Mois)} {m.Annee}|{FormatHelpers.FormatDuree(m.Theorique)}|" +
                           $"{FormatHelpers.FormatDuree(m.Realise)}|{FormatHelpers.FormatEcart(m.Ecart)}|" +
                           $"{FormatHelpers.FormatEcart(m.SoldeCumule)}|{statut}|");

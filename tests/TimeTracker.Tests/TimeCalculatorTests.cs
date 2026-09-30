@@ -2,7 +2,7 @@ namespace TimeTracker.Tests;
 
 public class TimeCalculatorTests
 {
-    private static readonly ReleveConfig Config = ReleveConfig.Defaut; // 8h12 / pause min 0h30
+    private static readonly ReleveConfig Config = ReleveConfig.Defaut; // 8h12 / pause min 0h30 / tolerance 10h
 
     private static DayEntry Jour(DateOnly date, string arrivee, string? debutPause, string? finPause, string depart) => new()
     {
@@ -34,6 +34,17 @@ public class TimeCalculatorTests
 
         var resultat = Assert.Single(rapport.Jours);
         Assert.Equal(TimeSpan.FromMinutes(45), resultat.PauseDecomptee);
+    }
+
+    [Fact]
+    public void JourSansPause_PerdLaPauseMinimum()
+    {
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "17:00");
+        var rapport = TimeCalculator.Calculer([jour], Config);
+
+        var resultat = Assert.Single(rapport.Jours);
+        Assert.Equal(TimeSpan.FromMinutes(30), resultat.PauseDecomptee);
+        Assert.Equal(new TimeSpan(8, 30, 0), resultat.TempsRealise); // 9h00 - 0h30
     }
 
     [Fact]
@@ -119,9 +130,23 @@ public class TimeCalculatorTests
     }
 
     [Fact]
+    public void ToleranceConfiguree_RemplaceLesDixHeures()
+    {
+        // lundi seul, sans pause : 0h30 realise pour 8h12 theoriques, solde -7h42
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "09:00");
+
+        var large = TimeCalculator.Calculer([jour], ReleveConfig.Defaut);
+        Assert.False(Assert.Single(large.Mois).HorsTolerance);
+
+        var serree = new ReleveConfig { DureeJournee = ReleveConfig.Defaut.DureeJournee, PauseMinimum = ReleveConfig.Defaut.PauseMinimum, Tolerance = TimeSpan.FromHours(5) };
+        var rapport = TimeCalculator.Calculer([jour], serree);
+        Assert.True(Assert.Single(rapport.Mois).HorsTolerance);
+    }
+
+    [Fact]
     public void ConfigPersonnalisee_ChangeLObjectifEtLaPauseMinimum()
     {
-        var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 0, 0), PauseMinimum = TimeSpan.FromMinutes(45) };
+        var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 0, 0), PauseMinimum = TimeSpan.FromMinutes(45), Tolerance = TimeSpan.FromHours(10) };
         var jour = Jour(new DateOnly(2026, 9, 28), "08:00", "12:00", "12:20", "15:30");
         var rapport = TimeCalculator.Calculer([jour], config);
 

@@ -44,6 +44,9 @@ public static class FormatHelpers
         return $"{heures}h{minutes:00}";
     }
 
+    /// Plage symetrique, ex: "-10h00/+10h00".
+    public static string FormatTolerance(TimeSpan tolerance) => $"-{FormatDuree(tolerance)}/+{FormatDuree(tolerance)}";
+
     /// Ecart signe, ex: "+2h30", "-0h45", "0h00".
     public static string FormatEcart(TimeSpan ts)
     {

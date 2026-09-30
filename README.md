@@ -11,9 +11,9 @@ Site : https://ymauray.github.io/timetracker/
 ## Fonctionnalités
 
 - Pointage quotidien en Markdown (arrivée, pause déjeuner, départ) — un seul fichier texte, éditable partout.
-- Règle de pause minimale configurable (ex : une pause de 15 min est quand même décomptée comme 30 min).
+- Règle de pause minimale configurable (ex : une pause de 15 min est quand même décomptée comme 30 min, et une journée sans pause perd aussi 30 min).
 - Jours d'absence (Congés, Maladie, Férié, RTT, Divers) neutres sur le solde d'heures.
-- Bilan hebdomadaire et bilan mensuel avec report du solde d'un mois sur l'autre et alerte de tolérance (± une plage configurable).
+- Bilan hebdomadaire et bilan mensuel avec report du solde d'un mois sur l'autre et alerte de tolérance (± une plage configurable, 10 h par défaut).
 - Jour ouvré oublié dans le pointage → signalé et compté en déficit.
 - Génère un rapport Markdown et un rapport PDF mis en forme.
 - Binaire natif autonome (self-contained, un seul fichier) : aucune installation de runtime .NET nécessaire.
@@ -54,6 +54,7 @@ Un en-tête optionnel (*front-matter*) définit les paramètres de calcul, suivi
 ---
 duree_journee: 8h12
 pause_minimum: 0h30
+tolerance: 10h
 ---
 |Date      |Arrivée|Début pause|Fin pause|Départ|Absence|
 |----------|-------|-----------|---------|------|-------|
@@ -63,7 +64,9 @@ pause_minimum: 0h30
 
 - Dates au format `j.m.aaaa` (jour et mois à 1 ou 2 chiffres, ex : `1.10.2026`, `21.02.2027`, `28.09.2026`), heures au format `Hh` ou `HhMM` (ex : `8h`, `8h30`).
 - Colonne `Absence` : vide (jour travaillé) ou un code parmi `Conges`/`CP`, `Maladie`, `Ferie`/`Férié`, `RTT`, `Divers`.
-- Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`).
+- Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`, `tolerance: 10h`). Une clé absente prend sa valeur par défaut.
+- `pause_minimum` est décomptée de tout jour travaillé : une pause plus courte, ou aucune pause saisie, compte pour cette durée.
+- `tolerance` : écart maximal du solde mensuel cumulé, en plus ou en moins, avant l'alerte « hors tolérance ».
 - Une ligne sans date (colonne `Date` vide) est ignorée : pratique pour aérer visuellement le tableau entre deux semaines.
 - Un jour ouvré absent du fichier est compté comme un déficit de la journée entière.
 

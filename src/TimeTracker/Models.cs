@@ -52,7 +52,7 @@ public sealed class MonthSummary
     public TimeSpan Realise { get; init; }
     public TimeSpan Ecart => Realise - Theorique;
     public TimeSpan SoldeCumule { get; set; }
-    public bool HorsTolerance => SoldeCumule.Duration() > TimeSpan.FromHours(10);
+    public bool HorsTolerance { get; set; }
 }
 
 public sealed class ParseError
