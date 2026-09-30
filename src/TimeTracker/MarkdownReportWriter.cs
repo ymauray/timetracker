@@ -13,6 +13,7 @@ public static class MarkdownReportWriter
         sb.AppendLine($"Genere le {DateTime.Now:dd/MM/yyyy a HH:mm}.  ");
         sb.AppendLine($"Parametres : journee de reference {FormatHelpers.FormatDuree(rapport.Config.DureeJournee)}, " +
                       $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}, " +
+                      $"sauf journee de moins de {FormatHelpers.FormatDuree(rapport.Config.SeuilPause)}, " +
                       $"tolerance mensuelle {FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}.");
         sb.AppendLine();
 

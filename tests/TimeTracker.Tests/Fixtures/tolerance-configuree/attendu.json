@@ -1,5 +1,5 @@
 {
-  "config": { "dureeJournee": 420, "pauseMinimum": 45, "tolerance": 300 },
+  "config": { "dureeJournee": 420, "pauseMinimum": 45, "seuilPause": 300, "tolerance": 300 },
   "erreurs": [],
   "jours": [
     { "date": "2026-10-05", "pauseDecomptee": 45, "theorique": 420, "realise": 255 },

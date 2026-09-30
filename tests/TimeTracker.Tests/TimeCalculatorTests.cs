@@ -138,15 +138,50 @@ public class TimeCalculatorTests
         var large = TimeCalculator.Calculer([jour], ReleveConfig.Defaut);
         Assert.False(Assert.Single(large.Mois).HorsTolerance);
 
-        var serree = new ReleveConfig { DureeJournee = ReleveConfig.Defaut.DureeJournee, PauseMinimum = ReleveConfig.Defaut.PauseMinimum, Tolerance = TimeSpan.FromHours(5) };
+        var serree = new ReleveConfig { DureeJournee = ReleveConfig.Defaut.DureeJournee, PauseMinimum = ReleveConfig.Defaut.PauseMinimum, SeuilPause = ReleveConfig.Defaut.SeuilPause, Tolerance = TimeSpan.FromHours(5) };
         var rapport = TimeCalculator.Calculer([jour], serree);
         Assert.True(Assert.Single(rapport.Mois).HorsTolerance);
     }
 
     [Fact]
+    public void JourneeCourte_SansPause_NePerdPasLaPauseMinimum()
+    {
+        // 4h59 de presence, sous le seuil de 5h
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "12:59");
+        var rapport = TimeCalculator.Calculer([jour], Config);
+
+        var resultat = Assert.Single(rapport.Jours);
+        Assert.Equal(TimeSpan.Zero, resultat.PauseDecomptee);
+        Assert.Equal(new TimeSpan(4, 59, 0), resultat.TempsRealise);
+    }
+
+    [Fact]
+    public void JourneeAuSeuil_PerdLaPauseMinimum()
+    {
+        // 5h00 de presence pile : le seuil est atteint
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "13:00");
+        var rapport = TimeCalculator.Calculer([jour], Config);
+
+        var resultat = Assert.Single(rapport.Jours);
+        Assert.Equal(TimeSpan.FromMinutes(30), resultat.PauseDecomptee);
+        Assert.Equal(new TimeSpan(4, 30, 0), resultat.TempsRealise);
+    }
+
+    [Fact]
+    public void JourneeCourte_AvecPause_DecompteLaPauseReelle()
+    {
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", "10:00", "10:15", "12:00");
+        var rapport = TimeCalculator.Calculer([jour], Config);
+
+        var resultat = Assert.Single(rapport.Jours);
+        Assert.Equal(TimeSpan.FromMinutes(15), resultat.PauseDecomptee);
+        Assert.Equal(new TimeSpan(3, 45, 0), resultat.TempsRealise);
+    }
+
+    [Fact]
     public void ConfigPersonnalisee_ChangeLObjectifEtLaPauseMinimum()
     {
-        var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 0, 0), PauseMinimum = TimeSpan.FromMinutes(45), Tolerance = TimeSpan.FromHours(10) };
+        var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 0, 0), PauseMinimum = TimeSpan.FromMinutes(45), SeuilPause = ReleveConfig.Defaut.SeuilPause, Tolerance = TimeSpan.FromHours(10) };
         var jour = Jour(new DateOnly(2026, 9, 28), "08:00", "12:00", "12:20", "15:30");
         var rapport = TimeCalculator.Calculer([jour], config);
 

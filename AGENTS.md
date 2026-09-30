@@ -25,8 +25,9 @@ dotnet publish src/TimeTracker -c Release -r <win-x64|linux-x64|osx-x64|osx-arm6
 
 ## Règles métier (ne pas les redécouvrir en lisant le code seul, elles sont réparties entre `TimeCalculator.cs` et `ConfigParser.cs`)
 
-- Journée de référence et pause minimum sont **configurables** via le front-matter de `releve.md` (`duree_journee`, `pause_minimum`, `tolerance`), avec défauts 8h12 / 0h30 / 10h si absents.
+- Journée de référence et pause minimum sont **configurables** via le front-matter de `releve.md` (`duree_journee`, `pause_minimum`, `seuil_pause`, `tolerance`), avec défauts 8h12 / 0h30 / 5h / 10h si absents.
 - Pause décomptée d'un jour travaillé = `max(pause réelle, pause_minimum)` — jamais moins que le minimum, **y compris quand aucune pause n'est saisie** (règlement : une journée sans pause de midi perd la pause minimum).
+- Exception : une journée dont la présence (départ − arrivée) est **strictement inférieure** à `seuil_pause` ne décompte que sa pause réelle (zéro si aucune).
 - Un jour marqué avec un code d'absence (`Conges`/`CP`, `Maladie`, `Ferie`, `RTT`, `Divers`) est neutre : réalisé = théorique, aucun impact sur le solde. `CP` reste un alias accepté pour `Conges` (saisie historique).
 - Une ligne du tableau sans date (colonne `Date` vide) est silencieusement ignorée par `ReleveParser` — sert à aérer visuellement `releve.md`. Ne pas la traiter comme une erreur.
 - Les dates acceptent 1 ou 2 chiffres pour le jour et le mois (`d.M.yyyy`), pas seulement `dd.MM.yyyy`.

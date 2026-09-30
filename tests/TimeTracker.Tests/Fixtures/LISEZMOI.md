@@ -7,7 +7,7 @@ iOS (`timetracker.ios`) en garde une copie et doit produire les mêmes résultat
 Toutes les durées sont en minutes entières, signées pour les écarts et soldes.
 Les dates sont au format `aaaa-mm-jj`.
 
-- `config` : réglages retenus (`dureeJournee`, `pauseMinimum`, `tolerance`),
+- `config` : réglages retenus (`dureeJournee`, `pauseMinimum`, `seuilPause`, `tolerance`),
   valeurs par défaut comprises.
 - `erreurs` : erreurs du front-matter puis du tableau, dans l'ordre, avec le
   numéro de ligne et le message exact. Quand la liste n'est pas vide, aucun

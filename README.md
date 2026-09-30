@@ -54,6 +54,7 @@ Un en-tête optionnel (*front-matter*) définit les paramètres de calcul, suivi
 ---
 duree_journee: 8h12
 pause_minimum: 0h30
+seuil_pause: 5h
 tolerance: 10h
 ---
 |Date      |Arrivée|Début pause|Fin pause|Départ|Absence|
@@ -64,8 +65,9 @@ tolerance: 10h
 
 - Dates au format `j.m.aaaa` (jour et mois à 1 ou 2 chiffres, ex : `1.10.2026`, `21.02.2027`, `28.09.2026`), heures au format `Hh` ou `HhMM` (ex : `8h`, `8h30`).
 - Colonne `Absence` : vide (jour travaillé) ou un code parmi `Conges`/`CP`, `Maladie`, `Ferie`/`Férié`, `RTT`, `Divers`.
-- Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`, `tolerance: 10h`). Une clé absente prend sa valeur par défaut.
+- Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`, `seuil_pause: 5h`, `tolerance: 10h`). Une clé absente prend sa valeur par défaut.
 - `pause_minimum` est décomptée de tout jour travaillé : une pause plus courte, ou aucune pause saisie, compte pour cette durée.
+- `seuil_pause` : une journée dont la présence (départ − arrivée) est inférieure à ce seuil ne perd que sa pause réelle, sans minimum. À 5h pile, la pause minimum s'applique.
 - `tolerance` : écart maximal du solde mensuel cumulé, en plus ou en moins, avant l'alerte « hors tolérance ».
 - Une ligne sans date (colonne `Date` vide) est ignorée : pratique pour aérer visuellement le tableau entre deux semaines.
 - Un jour ouvré absent du fichier est compté comme un déficit de la journée entière.
