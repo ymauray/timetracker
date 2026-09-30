@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeTracker — pointage d'heures en Markdown</title>
+<meta name="description" content="Outil en ligne de commande qui lit un pointage d'heures au format Markdown et génère un bilan hebdomadaire/mensuel en Markdown et PDF.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f5f6f8;
+    --text: #1c1f24;
+    --text-muted: #5b6270;
+    --accent: #2f5597;
+    --accent-contrast: #ffffff;
+    --border: #e2e5ea;
+    --code-bg: #1c1f24;
+    --code-text: #e7ebf3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161a;
+      --bg-alt: #1b1e24;
+      --text: #eceef1;
+      --text-muted: #a2a9b5;
+      --accent: #7fa6e0;
+      --accent-contrast: #0c1220;
+      --border: #2a2e36;
+      --code-bg: #0d0f12;
+      --code-text: #dbe2ee;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a;
+    --bg-alt: #1b1e24;
+    --text: #eceef1;
+    --text-muted: #a2a9b5;
+    --accent: #7fa6e0;
+    --accent-contrast: #0c1220;
+    --border: #2a2e36;
+    --code-bg: #0d0f12;
+    --code-text: #dbe2ee;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 16px; }
+
+  header.hero {
+    padding: 64px 0 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero h1 {
+    margin: 0 0 8px;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    letter-spacing: -0.02em;
+  }
+  header.hero p.tagline {
+    margin: 0 0 24px;
+    color: var(--text-muted);
+    font-size: 1.15rem;
+  }
+
+  .buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
+  .btn.secondary { color: var(--text); }
+
+  section { padding: 40px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 1.4rem; margin-bottom: 16px; }
+
+  ul.features { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  ul.features li { padding-left: 28px; position: relative; }
+  ul.features li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  :not(pre) > code {
+    background: var(--bg-alt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
+
+  footer {
+    padding: 32px 0 64px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--text-muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TimeTracker</h1>
+      <p class="tagline">Pointage d'heures de travail en Markdown → bilan hebdomadaire et mensuel, en Markdown et en PDF.</p>
+      <div class="buttons">
+        <a class="btn primary" href="https://github.com/ymauray/timetracker/releases/latest">Télécharger la dernière version</a>
+        <a class="btn secondary" href="https://github.com/ymauray/timetracker">Voir le code source</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>Ce que ça fait</h2>
+      <ul class="features">
+        <li>Un seul fichier texte à éditer : <code>releve.md</code>, un tableau Markdown avec arrivée, pause déjeuner et départ.</li>
+        <li>Règle de pause minimale configurable — une pause de 15&nbsp;min compte quand même pour 30&nbsp;min si c'est le minimum réglé.</li>
+        <li>Jours d'absence (CP, Maladie, Férié, RTT) neutres sur le solde d'heures.</li>
+        <li>Bilan hebdomadaire et mensuel, avec report du solde d'un mois sur l'autre et alerte de tolérance.</li>
+        <li>Rapport Markdown <em>et</em> PDF mis en forme, générés en une commande.</li>
+        <li>Binaire natif autonome : aucune installation de runtime nécessaire.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Aperçu</h2>
+      <pre><code>---
+duree_journee: 8h12
+pause_minimum: 0h30
+---
+|Date      |Arrivée|Début pause|Fin pause|Départ|Absence|
+|----------|-------|-----------|---------|------|-------|
+|28.09.2026|8h50   |12h00      |12h20    |16h50 |       |
+|29.09.2026|       |           |         |      |CP     |</code></pre>
+      <pre><code>$ TimeTracker
+Bilan genere : bilan.md
+Bilan PDF genere : bilan.pdf</code></pre>
+    </section>
+
+    <section>
+      <h2>Installation</h2>
+      <table>
+        <tr><th>Système</th><th>Fichier</th></tr>
+        <tr><td>Windows x64</td><td><code>TimeTracker-win-x64.exe</code></td></tr>
+        <tr><td>Linux x64</td><td><code>TimeTracker-linux-x64</code></td></tr>
+        <tr><td>macOS Intel</td><td><code>TimeTracker-osx-x64</code></td></tr>
+        <tr><td>macOS Apple Silicon</td><td><code>TimeTracker-osx-arm64</code></td></tr>
+      </table>
+      <p>Téléchargez le fichier correspondant depuis la <a href="https://github.com/ymauray/timetracker/releases/latest">dernière release</a>. Sur Linux/macOS : <code>chmod +x TimeTracker-*</code>.</p>
+    </section>
+
+    <footer>
+      <p><a href="https://github.com/ymauray/timetracker">github.com/ymauray/timetracker</a> — sous licence <a href="https://github.com/ymauray/timetracker/blob/main/LICENSE">MIT</a>.</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question d'utilisation
+    url: https://github.com/ymauray/timetracker/discussions
+    about: Pour une question generale, preferez les Discussions aux issues.
+  - name: Vulnerabilite de securite
+    url: https://github.com/ymauray/timetracker/security/advisories/new
+    about: Ne pas signaler une vulnerabilite via une issue publique, voir SECURITY.md.

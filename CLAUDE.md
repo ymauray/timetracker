@@ -1,0 +1,42 @@
+# CLAUDE.md
+
+Instructions pour les assistants IA travaillant sur ce dépôt.
+
+## Le projet
+
+TimeTracker est un outil CLI .NET 10 qui lit un pointage d'heures de travail (`releve.md`, tableau Markdown + front-matter de config) et génère un bilan hebdomadaire/mensuel en Markdown et PDF. Binaire self-contained, single-file, sans dépendance externe (police PDF embarquée).
+
+## Structure
+
+```
+src/TimeTracker/        Application (top-level Program.cs)
+tests/TimeTracker.Tests/ Tests xUnit
+docs/                    Site GitHub Pages statique (pas de build step)
+.github/workflows/       CI (build+test) et release (publication multi-plateforme sur tag vX.Y.Z)
+```
+
+## Commandes
+
+```
+dotnet build
+dotnet test
+dotnet publish src/TimeTracker -c Release -r <win-x64|linux-x64|osx-x64|osx-arm64> --self-contained -p:PublishSingleFile=true
+```
+
+## Règles métier (ne pas les redécouvrir en lisant le code seul, elles sont réparties entre `TimeCalculator.cs` et `ConfigParser.cs`)
+
+- Journée de référence et pause minimum sont **configurables** via le front-matter de `releve.md` (`duree_journee`, `pause_minimum`), avec défauts 8h12 / 0h30 si absents.
+- Pause décomptée = `max(pause réelle, pause_minimum)` — jamais moins que le minimum, même si le pointage indique une pause plus courte.
+- Un jour marqué avec un code d'absence (`CP`/`Maladie`/`Ferie`/`RTT`) est neutre : réalisé = théorique, aucun impact sur le solde.
+- Un jour ouvré absent du fichier (ni pointage ni code d'absence) compte comme un déficit total de la journée — ce n'est **pas** ignoré.
+- Le solde mensuel se cumule d'un mois sur l'autre (pas de remise à zéro) ; la tolérance ±10h (`ToleranceMensuelle` dans `TimeCalculator.cs`) s'évalue sur ce cumul, pas sur l'écart du mois seul.
+- Toutes les chaînes de format passées à des fonctions Excel/QuestPDF/`TEXT()`-like doivent éviter les codes de format anglais localisés (ex. `dddd`) — préférer un mapping explicite (`CHOOSE`/tableau de libellés) quand la sortie doit être indépendante de la langue du logiciel qui l'ouvre. Historique : ce bug s'est produit une fois sur le prototype Excel du projet.
+
+## Style
+
+`.editorconfig` à la racine fait foi. Pas de commentaires inutiles, noms de méthodes/variables en français (cohérence avec le domaine et le fichier `releve.md` que l'utilisateur édite directement).
+
+## CI
+
+- `ci.yml` : build + test sur push/PR vers `main`.
+- `release.yml` : sur tag `vX.Y.Z`, publie 4 binaires (win-x64, linux-x64, osx-x64, osx-arm64) en assets de la release GitHub. La version est injectée via `-p:Version=` depuis le tag, ne pas la coder en dur ailleurs.

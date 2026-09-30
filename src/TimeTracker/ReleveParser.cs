@@ -1,0 +1,191 @@
+using System.Globalization;
+
+namespace TimeTracker;
+
+public sealed class ParseResult
+{
+    public required List<DayEntry> Entrees { get; init; }
+    public required List<ParseError> Erreurs { get; init; }
+}
+
+public static partial class ReleveParser
+{
+    private static readonly string[] ColonnesAttendues =
+        ["Date", "Arrivee", "Debut pause", "Fin pause", "Depart", "Absence"];
+
+    public static ParseResult Parse(string[] lignes)
+    {
+        var erreurs = new List<ParseError>();
+        var entrees = new List<DayEntry>();
+        var datesVues = new Dictionary<DateOnly, int>();
+
+        var tableLignes = lignes
+            .Select((texte, index) => (texte, numero: index + 1))
+            .Where(l => l.texte.TrimStart().StartsWith('|'))
+            .ToList();
+
+        if (tableLignes.Count < 2)
+        {
+            erreurs.Add(new ParseError { Ligne = 1, Message = "Aucun tableau markdown (lignes commencant par '|') trouve dans le fichier." });
+            return new ParseResult { Entrees = entrees, Erreurs = erreurs };
+        }
+
+        var enTete = SplitCells(tableLignes[0].texte).Select(NormaliserEnTete).ToArray();
+        for (var i = 0; i < ColonnesAttendues.Length; i++)
+        {
+            if (i >= enTete.Length || enTete[i] != ColonnesAttendues[i])
+            {
+                erreurs.Add(new ParseError
+                {
+                    Ligne = tableLignes[0].numero,
+                    Message = $"En-tete de tableau invalide : colonnes attendues = " +
+                              $"|{string.Join('|', ["Date", "Arrivée", "Début pause", "Fin pause", "Départ", "Absence"])}|",
+                });
+                return new ParseResult { Entrees = entrees, Erreurs = erreurs };
+            }
+        }
+
+        // ligne 1 = en-tete, ligne 2 = separateur "---", les suivantes = donnees
+        for (var i = 2; i < tableLignes.Count; i++)
+        {
+            var (texte, numero) = tableLignes[i];
+            var cellules = SplitCells(texte);
+            if (cellules.Length < ColonnesAttendues.Length)
+            {
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Ligne incomplete : {cellules.Length} colonne(s) trouvee(s), 6 attendues." });
+                continue;
+            }
+
+            var dateTexte = cellules[0].Trim();
+            if (!DateOnly.TryParseExact(dateTexte, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            {
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Date invalide '{dateTexte}' (format attendu jj.mm.aaaa)." });
+                continue;
+            }
+
+            if (datesVues.TryGetValue(date, out var premiereLigne))
+            {
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Date en double : {FormatHelpers.FormatDate(date)} (deja presente ligne {premiereLigne})." });
+                continue;
+            }
+
+            var absenceTexte = cellules[5].Trim();
+            Absence absence;
+            if (absenceTexte.Length == 0)
+            {
+                absence = Absence.Aucune;
+            }
+            else if (!TryParseAbsence(absenceTexte, out absence))
+            {
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Code absence inconnu '{absenceTexte}' (valeurs valides : CP, Maladie, Ferie, RTT)." });
+                continue;
+            }
+
+            var erreurLigne = false;
+            TimeOnly? LireHeure(string cell, string nomChamp)
+            {
+                var texteHeure = cell.Trim();
+                if (texteHeure.Length == 0) return null;
+                var parsed = DureeParsing.Parse(texteHeure);
+                if (parsed is null)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = $"Heure invalide pour '{nomChamp}' : '{texteHeure}' (format attendu ex: 8h50)." });
+                    erreurLigne = true;
+                    return null;
+                }
+                var (h, min) = parsed.Value;
+                if (h > 23)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = $"Heure hors limites pour '{nomChamp}' : '{texteHeure}'." });
+                    erreurLigne = true;
+                    return null;
+                }
+                return new TimeOnly(h, min);
+            }
+
+            var arrivee = LireHeure(cellules[1], "Arrivee");
+            var debutPause = LireHeure(cellules[2], "Debut pause");
+            var finPause = LireHeure(cellules[3], "Fin pause");
+            var depart = LireHeure(cellules[4], "Depart");
+            if (erreurLigne) continue;
+
+            if (absence != Absence.Aucune)
+            {
+                if (arrivee is not null || debutPause is not null || finPause is not null || depart is not null)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = "Jour marque en absence mais des horaires sont renseignes : videz les colonnes horaires ou retirez le code absence." });
+                    continue;
+                }
+            }
+            else
+            {
+                if (arrivee is null || depart is null)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = "Arrivee et Depart sont obligatoires pour un jour travaille (ou renseignez un code Absence)." });
+                    continue;
+                }
+                if (depart <= arrivee)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = $"Depart ({FormatHelpers.FormatHeure(depart)}) doit etre apres Arrivee ({FormatHelpers.FormatHeure(arrivee)})." });
+                    continue;
+                }
+                if ((debutPause is null) != (finPause is null))
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = "Debut pause et Fin pause doivent etre soit tous les deux renseignes, soit tous les deux vides." });
+                    continue;
+                }
+                if (debutPause is not null && finPause <= debutPause)
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = $"Fin pause ({FormatHelpers.FormatHeure(finPause)}) doit etre apres Debut pause ({FormatHelpers.FormatHeure(debutPause)})." });
+                    continue;
+                }
+                if (debutPause is not null && (debutPause < arrivee || finPause > depart))
+                {
+                    erreurs.Add(new ParseError { Ligne = numero, Message = "La pause doit etre comprise entre l'arrivee et le depart." });
+                    continue;
+                }
+            }
+
+            datesVues[date] = numero;
+            entrees.Add(new DayEntry
+            {
+                Date = date,
+                Absence = absence,
+                Arrivee = arrivee,
+                DebutPause = debutPause,
+                FinPause = finPause,
+                Depart = depart,
+                Renseigne = true,
+                LigneSource = numero,
+            });
+        }
+
+        return new ParseResult { Entrees = entrees, Erreurs = erreurs };
+    }
+
+    private static bool TryParseAbsence(string texte, out Absence absence)
+    {
+        var normalise = RetirerAccents(texte).Trim().ToUpperInvariant();
+        switch (normalise)
+        {
+            case "CP": absence = Absence.CP; return true;
+            case "MALADIE": absence = Absence.Maladie; return true;
+            case "FERIE": absence = Absence.Ferie; return true;
+            case "RTT": absence = Absence.RTT; return true;
+            default: absence = Absence.Aucune; return false;
+        }
+    }
+
+    private static string RetirerAccents(string s) =>
+        s.Replace("é", "e").Replace("è", "e").Replace("ê", "e").Replace("É", "E").Replace("È", "E").Replace("Ê", "E");
+
+    private static string NormaliserEnTete(string s) => RetirerAccents(s.Trim());
+
+    private static string[] SplitCells(string ligne)
+    {
+        var t = ligne.Trim();
+        if (t.StartsWith('|')) t = t[1..];
+        if (t.EndsWith('|')) t = t[..^1];
+        return t.Split('|');
+    }
+}
