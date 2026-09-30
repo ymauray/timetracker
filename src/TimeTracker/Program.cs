@@ -98,6 +98,6 @@ if (rapport.JoursNonRenseignes.Count > 0)
 
 var moisHorsTolerance = rapport.Mois.Count(m => m.HorsTolerance);
 if (moisHorsTolerance > 0)
-    Console.WriteLine($"Attention : {moisHorsTolerance} mois hors tolerance (-10h/+10h).");
+    Console.WriteLine($"Attention : {moisHorsTolerance} mois hors tolerance ({FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}).");
 
 return 0;

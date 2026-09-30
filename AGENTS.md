@@ -25,14 +25,18 @@ dotnet publish src/TimeTracker -c Release -r <win-x64|linux-x64|osx-x64|osx-arm6
 
 ## Règles métier (ne pas les redécouvrir en lisant le code seul, elles sont réparties entre `TimeCalculator.cs` et `ConfigParser.cs`)
 
-- Journée de référence et pause minimum sont **configurables** via le front-matter de `releve.md` (`duree_journee`, `pause_minimum`), avec défauts 8h12 / 0h30 si absents.
-- Pause décomptée = `max(pause réelle, pause_minimum)` — jamais moins que le minimum, même si le pointage indique une pause plus courte.
+- Journée de référence et pause minimum sont **configurables** via le front-matter de `releve.md` (`duree_journee`, `pause_minimum`, `tolerance`), avec défauts 8h12 / 0h30 / 10h si absents.
+- Pause décomptée d'un jour travaillé = `max(pause réelle, pause_minimum)` — jamais moins que le minimum, **y compris quand aucune pause n'est saisie** (règlement : une journée sans pause de midi perd la pause minimum).
 - Un jour marqué avec un code d'absence (`Conges`/`CP`, `Maladie`, `Ferie`, `RTT`, `Divers`) est neutre : réalisé = théorique, aucun impact sur le solde. `CP` reste un alias accepté pour `Conges` (saisie historique).
 - Une ligne du tableau sans date (colonne `Date` vide) est silencieusement ignorée par `ReleveParser` — sert à aérer visuellement `releve.md`. Ne pas la traiter comme une erreur.
 - Les dates acceptent 1 ou 2 chiffres pour le jour et le mois (`d.M.yyyy`), pas seulement `dd.MM.yyyy`.
 - Un jour ouvré absent du fichier (ni pointage ni code d'absence) compte comme un déficit total de la journée — ce n'est **pas** ignoré.
-- Le solde mensuel se cumule d'un mois sur l'autre (pas de remise à zéro) ; la tolérance ±10h (`ToleranceMensuelle` dans `TimeCalculator.cs`) s'évalue sur ce cumul, pas sur l'écart du mois seul.
+- Le solde mensuel se cumule d'un mois sur l'autre (pas de remise à zéro) ; la tolérance (`tolerance`, 10h par défaut) s'évalue sur ce cumul, pas sur l'écart du mois seul.
 - Toutes les chaînes de format passées à des fonctions Excel/QuestPDF/`TEXT()`-like doivent éviter les codes de format anglais localisés (ex. `dddd`) — préférer un mapping explicite (`CHOOSE`/tableau de libellés) quand la sortie doit être indépendante de la langue du logiciel qui l'ouvre. Historique : ce bug s'est produit une fois sur le prototype Excel du projet.
+
+## Fixtures partagées
+
+`tests/TimeTracker.Tests/Fixtures/` contient des paires `releve.md` + `attendu.json` calculées à la main, vérifiées par `FixturesTests.cs`. L'app iOS (dépôt séparé `timetracker.ios`) en garde une copie et doit produire les mêmes résultats : toute évolution d'une règle métier passe par une fixture, et la copie iOS doit être mise à jour. Le format est décrit dans `Fixtures/LISEZMOI.md`.
 
 ## Style
 

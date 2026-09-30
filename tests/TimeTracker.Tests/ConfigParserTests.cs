@@ -10,16 +10,18 @@ public class ConfigParserTests
         Assert.Empty(resultat.Erreurs);
         Assert.Equal(ReleveConfig.Defaut.DureeJournee, resultat.Config.DureeJournee);
         Assert.Equal(ReleveConfig.Defaut.PauseMinimum, resultat.Config.PauseMinimum);
+        Assert.Equal(TimeSpan.FromHours(10), resultat.Config.Tolerance);
     }
 
     [Fact]
     public void FrontMatterValide_SurchargeLesValeurs()
     {
-        var resultat = ConfigParser.Parse(["---", "duree_journee: 7h00", "pause_minimum: 0h45", "---", "|Date|...|"]);
+        var resultat = ConfigParser.Parse(["---", "duree_journee: 7h00", "pause_minimum: 0h45", "tolerance: 5h30", "---", "|Date|...|"]);
 
         Assert.Empty(resultat.Erreurs);
         Assert.Equal(new TimeSpan(7, 0, 0), resultat.Config.DureeJournee);
         Assert.Equal(TimeSpan.FromMinutes(45), resultat.Config.PauseMinimum);
+        Assert.Equal(new TimeSpan(5, 30, 0), resultat.Config.Tolerance);
     }
 
     [Fact]
