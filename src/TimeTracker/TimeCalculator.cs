@@ -121,12 +121,16 @@ public static class TimeCalculator
         }
         else if (entree.Arrivee is not null && entree.Depart is not null)
         {
-            // reglement : une journee sans pause saisie perd quand meme la pause minimum
             var pauseReelle = entree.DebutPause is not null && entree.FinPause is not null
                 ? entree.FinPause.Value - entree.DebutPause.Value
                 : TimeSpan.Zero;
-            pauseDecomptee = pauseReelle > config.PauseMinimum ? pauseReelle : config.PauseMinimum;
-            realise = (entree.Depart.Value - entree.Arrivee.Value) - pauseDecomptee;
+            var presence = entree.Depart.Value - entree.Arrivee.Value;
+            // reglement : une journee sans pause saisie perd quand meme la pause minimum,
+            // sauf une journee courte (presence sous le seuil), qui ne perd que sa pause reelle
+            pauseDecomptee = presence < config.SeuilPause || pauseReelle > config.PauseMinimum
+                ? pauseReelle
+                : config.PauseMinimum;
+            realise = presence - pauseDecomptee;
         }
         else
         {

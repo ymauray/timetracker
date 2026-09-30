@@ -40,6 +40,7 @@ public class FixturesTests
             {
                 ["dureeJournee"] = Minutes(config.Config.DureeJournee),
                 ["pauseMinimum"] = Minutes(config.Config.PauseMinimum),
+                ["seuilPause"] = Minutes(config.Config.SeuilPause),
                 ["tolerance"] = Minutes(config.Config.Tolerance),
             },
             ["erreurs"] = new JsonArray([.. erreurs.Select(e => new JsonObject { ["ligne"] = e.Ligne, ["message"] = e.Message })]),

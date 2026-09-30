@@ -1,5 +1,5 @@
 {
-  "config": { "dureeJournee": 492, "pauseMinimum": 30, "tolerance": 600 },
+  "config": { "dureeJournee": 492, "pauseMinimum": 30, "seuilPause": 300, "tolerance": 600 },
   "erreurs": [
     { "ligne": 1, "message": "Valeur invalide pour 'tolerance' dans le front-matter : 'dix heures' (format attendu ex: 8h12)." },
     { "ligne": 7, "message": "Date invalide '31.09.2026' (format attendu jj.mm.aaaa, ex: 1.10.2026 ou 21.02.2027)." },

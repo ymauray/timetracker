@@ -137,7 +137,7 @@
       <h2>Ce que ça fait</h2>
       <ul class="features">
         <li>Un seul fichier texte à éditer : <code>releve.md</code>, un tableau Markdown avec arrivée, pause déjeuner et départ.</li>
-        <li>Règle de pause minimale configurable — une pause de 15&nbsp;min compte quand même pour 30&nbsp;min si c'est le minimum réglé, et une journée sans pause perd aussi ces 30&nbsp;min.</li>
+        <li>Règle de pause minimale configurable — une pause de 15&nbsp;min compte quand même pour 30&nbsp;min si c'est le minimum réglé, et une journée sans pause perd aussi ces 30&nbsp;min, sauf une journée courte (moins de 5&nbsp;h, réglable).</li>
         <li>Jours d'absence (Congés, Maladie, Férié, RTT, Divers) neutres sur le solde d'heures.</li>
         <li>Bilan hebdomadaire et mensuel, avec report du solde d'un mois sur l'autre et alerte de tolérance configurable.</li>
         <li>Rapport Markdown <em>et</em> PDF mis en forme, générés en une commande.</li>
@@ -150,6 +150,7 @@
       <pre><code>---
 duree_journee: 8h12
 pause_minimum: 0h30
+seuil_pause: 5h
 tolerance: 10h
 ---
 |Date      |Arrivée|Début pause|Fin pause|Départ|Absence|

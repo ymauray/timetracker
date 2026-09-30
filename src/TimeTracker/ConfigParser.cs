@@ -4,12 +4,14 @@ public sealed class ReleveConfig
 {
     public required TimeSpan DureeJournee { get; init; }
     public required TimeSpan PauseMinimum { get; init; }
+    public required TimeSpan SeuilPause { get; init; }
     public required TimeSpan Tolerance { get; init; }
 
     public static readonly ReleveConfig Defaut = new()
     {
         DureeJournee = new TimeSpan(8, 12, 0),
         PauseMinimum = TimeSpan.FromMinutes(30),
+        SeuilPause = TimeSpan.FromHours(5),
         Tolerance = TimeSpan.FromHours(10),
     };
 }
@@ -81,6 +83,7 @@ public static class ConfigParser
         {
             DureeJournee = LireDuree("duree_journee", ReleveConfig.Defaut.DureeJournee),
             PauseMinimum = LireDuree("pause_minimum", ReleveConfig.Defaut.PauseMinimum),
+            SeuilPause = LireDuree("seuil_pause", ReleveConfig.Defaut.SeuilPause),
             Tolerance = LireDuree("tolerance", ReleveConfig.Defaut.Tolerance),
         };
 

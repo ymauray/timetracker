@@ -34,6 +34,7 @@ public static class PdfReportWriter
                     col.Item().Text(
                         $"Parametres : journee de reference {FormatHelpers.FormatDuree(rapport.Config.DureeJournee)}, " +
                         $"pause minimum decomptee {FormatHelpers.FormatDuree(rapport.Config.PauseMinimum)}, " +
+                        $"sauf journee de moins de {FormatHelpers.FormatDuree(rapport.Config.SeuilPause)}, " +
                         $"tolerance mensuelle {FormatHelpers.FormatTolerance(rapport.Config.Tolerance)}").FontSize(9).FontColor(Colors.Grey.Darken1);
                     col.Item().PaddingTop(8).LineHorizontal(1).LineColor(CouleurEntete);
                 });
