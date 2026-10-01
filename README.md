@@ -64,7 +64,9 @@ tolerance: 10h
 ```
 
 - Dates au format `j.m.aaaa` (jour et mois à 1 ou 2 chiffres, ex : `1.10.2026`, `21.02.2027`, `28.09.2026`), heures au format `Hh` ou `HhMM` (ex : `8h`, `8h30`).
-- Colonne `Absence` : vide (jour travaillé) ou un code parmi `Conges`/`CP`, `Maladie`, `Ferie`/`Férié`, `RTT`, `Divers`.
+- Colonne `Absence` : vide (jour travaillé) ou un code parmi `Conges`/`CP`, `Maladie`, `Ferie`/`Férié`, `RTT`, `Divers`, `Demi`.
+- Une demi-journée d'absence (congé, RTT, après-midi férié…) s'écrit avec les horaires de la partie travaillée et le code `Demi` : le travail compte, plus la moitié de la journée de référence (arrondie à la minute inférieure).
+- Une maladie survenue en cours de journée s'écrit avec les horaires de la partie travaillée et le code `Maladie` : la journée est complétée jusqu'à la journée de référence. Les autres codes n'acceptent pas d'horaires.
 - Sans front-matter, les valeurs par défaut s'appliquent (`duree_journee: 8h12`, `pause_minimum: 0h30`, `seuil_pause: 5h`, `tolerance: 10h`). Une clé absente prend sa valeur par défaut.
 - `pause_minimum` est décomptée de tout jour travaillé : une pause plus courte, ou aucune pause saisie, compte pour cette durée.
 - `seuil_pause` : une journée dont la présence (départ − arrivée) est inférieure à ce seuil ne perd que sa pause réelle, sans minimum. À 5h pile, la pause minimum s'applique.

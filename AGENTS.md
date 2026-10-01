@@ -29,6 +29,8 @@ dotnet publish src/TimeTracker -c Release -r <win-x64|linux-x64|osx-x64|osx-arm6
 - Pause décomptée d'un jour travaillé = `max(pause réelle, pause_minimum)` — jamais moins que le minimum, **y compris quand aucune pause n'est saisie** (règlement : une journée sans pause de midi perd la pause minimum).
 - Exception : une journée dont la présence (départ − arrivée) est **strictement inférieure** à `seuil_pause` ne décompte que sa pause réelle (zéro si aucune).
 - Un jour marqué avec un code d'absence (`Conges`/`CP`, `Maladie`, `Ferie`, `RTT`, `Divers`) est neutre : réalisé = théorique, aucun impact sur le solde. `CP` reste un alias accepté pour `Conges` (saisie historique).
+- `Demi` exige des horaires : réalisé = temps travaillé (règles de pause comprises) + théorique ÷ 2, arrondi à la minute inférieure. Sert au demi-congé, à la demi-RTT, à l'après-midi férié.
+- `Maladie` accepte des horaires (malaise en cours de journée) : réalisé = temps travaillé, complété jusqu'au théorique s'il en manque. Les autres codes refusent les horaires.
 - Une ligne du tableau sans date (colonne `Date` vide) est silencieusement ignorée par `ReleveParser` — sert à aérer visuellement `releve.md`. Ne pas la traiter comme une erreur.
 - Les dates acceptent 1 ou 2 chiffres pour le jour et le mois (`d.M.yyyy`), pas seulement `dd.MM.yyyy`.
 - Un jour ouvré absent du fichier (ni pointage ni code d'absence) compte comme un déficit total de la journée — ce n'est **pas** ignoré.

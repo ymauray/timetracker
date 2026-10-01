@@ -179,6 +179,56 @@ public class TimeCalculatorTests
     }
 
     [Fact]
+    public void DemiJournee_AjouteLaMoitieDuTheoriqueAuTravail()
+    {
+        // 4h travaillees + 4h06 de demi-journee : 6 min de deficit
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "12:00");
+        var rapport = TimeCalculator.Calculer([Absent(jour, Absence.Demi)], Config);
+
+        var resultat = Assert.Single(rapport.Jours);
+        Assert.Equal(TimeSpan.Zero, resultat.PauseDecomptee); // 4h de presence, sous le seuil
+        Assert.Equal(new TimeSpan(8, 6, 0), resultat.TempsRealise);
+    }
+
+    [Fact]
+    public void DemiJournee_ArrondiLaMoitieALaMinuteInferieure()
+    {
+        var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 5, 0), PauseMinimum = Config.PauseMinimum, SeuilPause = Config.SeuilPause, Tolerance = Config.Tolerance };
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", null, null, "12:00");
+        var rapport = TimeCalculator.Calculer([Absent(jour, Absence.Demi)], config);
+
+        Assert.Equal(TimeSpan.FromMinutes(240 + 212), Assert.Single(rapport.Jours).TempsRealise); // 7h05 / 2 = 3h32,5 -> 3h32
+    }
+
+    [Fact]
+    public void MaladieEnCoursDeJournee_CompleteJusquALaJourneeEntiere()
+    {
+        var jour = Jour(new DateOnly(2026, 9, 28), "07:50", null, null, "09:00");
+        var rapport = TimeCalculator.Calculer([Absent(jour, Absence.Maladie)], Config);
+
+        Assert.Equal(Config.DureeJournee, Assert.Single(rapport.Jours).TempsRealise);
+    }
+
+    [Fact]
+    public void MaladieApresUneJourneePleine_GardeLeTempsTravaille()
+    {
+        var jour = Jour(new DateOnly(2026, 9, 28), "08:00", "12:00", "12:30", "17:30");
+        var rapport = TimeCalculator.Calculer([Absent(jour, Absence.Maladie)], Config);
+
+        Assert.Equal(new TimeSpan(9, 0, 0), Assert.Single(rapport.Jours).TempsRealise);
+    }
+
+    private static DayEntry Absent(DayEntry jour, Absence absence) => new()
+    {
+        Date = jour.Date,
+        Absence = absence,
+        Arrivee = jour.Arrivee,
+        DebutPause = jour.DebutPause,
+        FinPause = jour.FinPause,
+        Depart = jour.Depart,
+    };
+
+    [Fact]
     public void ConfigPersonnalisee_ChangeLObjectifEtLaPauseMinimum()
     {
         var config = new ReleveConfig { DureeJournee = new TimeSpan(7, 0, 0), PauseMinimum = TimeSpan.FromMinutes(45), SeuilPause = ReleveConfig.Defaut.SeuilPause, Tolerance = TimeSpan.FromHours(10) };
