@@ -115,7 +115,7 @@ public static class TimeCalculator
 
         var pauseDecomptee = TimeSpan.Zero;
         TimeSpan realise;
-        if (entree.Absence != Absence.Aucune)
+        if (entree.Absence != Absence.Aucune && entree.Arrivee is null)
         {
             realise = theorique; // jour d'absence : neutre sur le solde
         }
@@ -131,6 +131,15 @@ public static class TimeCalculator
                 ? pauseReelle
                 : config.PauseMinimum;
             realise = presence - pauseDecomptee;
+            if (entree.Absence == Absence.Demi)
+            {
+                // demi-journee d'absence (conge, RTT...) : la moitie du theorique, en minutes entieres
+                realise += TimeSpan.FromMinutes(Math.Floor(theorique.TotalMinutes / 2));
+            }
+            else if (entree.Absence == Absence.Maladie && realise < theorique)
+            {
+                realise = theorique; // maladie en cours de journee : complete jusqu'a la journee entiere
+            }
         }
         else
         {

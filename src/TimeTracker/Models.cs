@@ -8,6 +8,7 @@ public enum Absence
     Ferie,
     RTT,
     Divers,
+    Demi,
 }
 
 public sealed class DayEntry

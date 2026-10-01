@@ -56,6 +56,36 @@ public class ReleveParserTests
     }
 
     [Fact]
+    public void DemiSansHoraires_ProduitUneErreur()
+    {
+        var resultat = ReleveParser.Parse(Lignes("|28.09.2026|||||Demi|"));
+
+        Assert.Contains(resultat.Erreurs, e => e.Message == "Le code Demi demande les horaires de la demi-journee travaillee.");
+    }
+
+    [Theory]
+    [InlineData("Demi", Absence.Demi)]
+    [InlineData("demi", Absence.Demi)]
+    [InlineData("Maladie", Absence.Maladie)]
+    public void DemiEtMaladie_AcceptentLesHorairesDeLaPartieTravaillee(string code, Absence attendu)
+    {
+        var resultat = ReleveParser.Parse(Lignes($"|28.09.2026|8h00|||12h00|{code}|"));
+
+        Assert.Empty(resultat.Erreurs);
+        var jour = Assert.Single(resultat.Entrees);
+        Assert.Equal(attendu, jour.Absence);
+        Assert.Equal(new TimeOnly(8, 0), jour.Arrivee);
+    }
+
+    [Fact]
+    public void DemiAvecHorairesIncoherents_ProduitUneErreur()
+    {
+        var resultat = ReleveParser.Parse(Lignes("|28.09.2026|12h00|||8h00|Demi|"));
+
+        Assert.Contains(resultat.Erreurs, e => e.Message.Contains("apres Arrivee"));
+    }
+
+    [Fact]
     public void JourTravailleSansArriveeNiDepart_ProduitUneErreur()
     {
         var resultat = ReleveParser.Parse(Lignes("|28.09.2026||||||"));

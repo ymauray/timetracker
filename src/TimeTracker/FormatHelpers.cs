@@ -30,6 +30,7 @@ public static class FormatHelpers
         Absence.Ferie => "Férié",
         Absence.RTT => "RTT",
         Absence.Divers => "Divers",
+        Absence.Demi => "Demi-journée",
         _ => absence.ToString(),
     };
 

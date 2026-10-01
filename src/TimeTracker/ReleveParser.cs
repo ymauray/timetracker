@@ -82,7 +82,7 @@ public static partial class ReleveParser
             }
             else if (!TryParseAbsence(absenceTexte, out absence))
             {
-                erreurs.Add(new ParseError { Ligne = numero, Message = $"Code absence inconnu '{absenceTexte}' (valeurs valides : Conges ou CP, Maladie, Ferie, RTT, Divers)." });
+                erreurs.Add(new ParseError { Ligne = numero, Message = $"Code absence inconnu '{absenceTexte}' (valeurs valides : Conges ou CP, Maladie, Ferie, RTT, Divers, Demi)." });
                 continue;
             }
 
@@ -114,15 +114,19 @@ public static partial class ReleveParser
             var depart = LireHeure(cellules[4], "Depart");
             if (erreurLigne) continue;
 
-            if (absence != Absence.Aucune)
+            var horairesSaisis = arrivee is not null || debutPause is not null || finPause is not null || depart is not null;
+            if (absence == Absence.Demi && !horairesSaisis)
             {
-                if (arrivee is not null || debutPause is not null || finPause is not null || depart is not null)
-                {
-                    erreurs.Add(new ParseError { Ligne = numero, Message = "Jour marque en absence mais des horaires sont renseignes : videz les colonnes horaires ou retirez le code absence." });
-                    continue;
-                }
+                erreurs.Add(new ParseError { Ligne = numero, Message = "Le code Demi demande les horaires de la demi-journee travaillee." });
+                continue;
             }
-            else
+            // Seules une demi-journee et une maladie survenue en cours de journee portent des horaires.
+            if (absence is not (Absence.Aucune or Absence.Demi or Absence.Maladie) && horairesSaisis)
+            {
+                erreurs.Add(new ParseError { Ligne = numero, Message = "Jour marque en absence mais des horaires sont renseignes : videz les colonnes horaires ou retirez le code absence." });
+                continue;
+            }
+            if (horairesSaisis || absence == Absence.Aucune)
             {
                 if (arrivee is null || depart is null)
                 {
@@ -178,6 +182,7 @@ public static partial class ReleveParser
             case "FERIE": absence = Absence.Ferie; return true;
             case "RTT": absence = Absence.RTT; return true;
             case "DIVERS": absence = Absence.Divers; return true;
+            case "DEMI": absence = Absence.Demi; return true;
             default: absence = Absence.Aucune; return false;
         }
     }

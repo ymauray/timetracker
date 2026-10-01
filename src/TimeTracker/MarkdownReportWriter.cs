@@ -77,7 +77,7 @@ public static class MarkdownReportWriter
                 ligne = $"|{FormatHelpers.FormatDate(e.Date)}|{FormatHelpers.NomJour(e.Date)}|non renseigne|-|-|-|" +
                         $"{FormatHelpers.FormatDuree(j.TempsRealise)}|{FormatHelpers.FormatDuree(j.TempsTheorique)}|{FormatHelpers.FormatEcart(j.Ecart)}|";
             }
-            else if (e.Absence != Absence.Aucune)
+            else if (e.Arrivee is null)
             {
                 ligne = $"|{FormatHelpers.FormatDate(e.Date)}|{FormatHelpers.NomJour(e.Date)}|{absenceTxt}|-|-|-|" +
                         $"{FormatHelpers.FormatDuree(j.TempsRealise)}|{FormatHelpers.FormatDuree(j.TempsTheorique)}|{FormatHelpers.FormatEcart(j.Ecart)}|";
@@ -85,7 +85,8 @@ public static class MarkdownReportWriter
             else
             {
                 var pauseTxt = j.PauseDecomptee > TimeSpan.Zero ? FormatHelpers.FormatDuree(j.PauseDecomptee) : "-";
-                ligne = $"|{FormatHelpers.FormatDate(e.Date)}|{FormatHelpers.NomJour(e.Date)}|-|" +
+                var absenceAvecHoraires = e.Absence == Absence.Aucune ? "-" : absenceTxt;
+                ligne = $"|{FormatHelpers.FormatDate(e.Date)}|{FormatHelpers.NomJour(e.Date)}|{absenceAvecHoraires}|" +
                         $"{FormatHelpers.FormatHeure(e.Arrivee)}|{pauseTxt}|{FormatHelpers.FormatHeure(e.Depart)}|" +
                         $"{FormatHelpers.FormatDuree(j.TempsRealise)}|{FormatHelpers.FormatDuree(j.TempsTheorique)}|{FormatHelpers.FormatEcart(j.Ecart)}|";
             }
